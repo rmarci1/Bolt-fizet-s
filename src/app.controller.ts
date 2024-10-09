@@ -47,33 +47,18 @@ export class AppController {
       });
       return;
     }
-
-    // CSV írás
-    const csvWriter = createObjectCsvWriter({
-      path: path.join(__dirname, 'adatok.csv'),
-      header: [
-        { id: 'nev', title: 'Név' },
-        { id: 'szamlaszam', title: 'Bankszámlaszám' },
-        { id: 'szerzodesi_feltetel', title: 'Szerződési feltétel' }
-      ]
-    });
-
-    const records = [
-      {
-        nev: szamladto.nev,
-        szamlaszam: szamladto.szamlaszam,
-        szerzodesi_feltetel: szamladto.szerzodesi_feltetel
-      }
-    ];
-
-
-    try {
-      await csvWriter.writeRecords(records);
-      console.log('Adatok sikeresen hozzáadva a CSV fájlhoz.');
-    } catch (error) {
-      console.error('Hiba a CSV írása során:', error);
-    }
+    const csvLine = `${szamladto.nev},${szamladto.szamlaszam},${szamladto.szerzodesi_feltetel==true?"igen":"nem"}\n`;
     
+    // CSV fájlba írás
+    const csvFilePath = path.join(__dirname,'..', 'adatok.csv');
+
+    fs.appendFile(csvFilePath, csvLine, (err) => {
+      if (err) {
+        console.error('Hiba a fájlba íráskor:', err);
+        response.status(500).send('Hiba történt a fájlba íráskor.');
+        return;
+      }
+    });
     response.redirect("/openAccountSuccess");
   }
 
